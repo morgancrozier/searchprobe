@@ -1,0 +1,28 @@
+{
+  "sitemap": [
+    {
+      "path": "https://example.com/sitemap_index.xml",
+      "lastSubmitted": "2026-08-01T10:00:00.000Z",
+      "isPending": false,
+      "isSitemapsIndex": true,
+      "type": "sitemap",
+      "lastDownloaded": "2026-09-11T02:15:00.000Z",
+      "warnings": "0",
+      "errors": "0",
+      "contents": [
+        { "type": "web", "submitted": "1200", "indexed": "0" },
+        { "type": "image", "submitted": "340", "indexed": "0" }
+      ]
+    },
+    {
+      "path": "https://example.com/news-sitemap.xml",
+      "lastSubmitted": "2026-09-10T08:00:00.000Z",
+      "isPending": true,
+      "isSitemapsIndex": false,
+      "type": "sitemap",
+      "warnings": "2",
+      "errors": "1",
+      "contents": [ { "type": "news", "submitted": "15", "indexed": "0" } ]
+    }
+  ]
+}

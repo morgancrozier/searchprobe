@@ -1,0 +1,34 @@
+# Build output (root-level binaries only; cmd/gsc/ is source)
+bin/
+dist/
+/gsc
+/searchprobe
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.envrc
+credentials*.json
+client_secret*.json
+client.json
+oauth-client.json
+token*.json
+*.token.json
+application_default_credentials.json
+
+# Local project state
+.gsc/
+.tmp/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Go
+coverage.out
+*.test
+__pycache__/
+*.py[cod]
+.secrets/

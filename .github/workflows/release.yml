@@ -1,0 +1,76 @@
+name: Release candidate
+on:
+  push:
+    tags: ['v*']
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          # Same supported current Go as CI; go.mod retains the language floor.
+          go-version: stable
+      - name: Verify tag checkout
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          test "$GITHUB_REF_TYPE" = tag
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git tag --points-at HEAD --list "$RELEASE_TAG")" = "$RELEASE_TAG"
+          go version
+      - name: Validate source
+        run: |
+          test -z "$(gofmt -l .)"
+          go vet ./...
+          go test ./...
+          go build ./...
+          sh -n scripts/install.sh
+          python3 scripts/test_install.py
+      - name: Build archives
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 scripts/release.py "$RELEASE_TAG"
+      - name: Validate release assets
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 scripts/test_bundle.py "dist/$RELEASE_TAG"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-candidate
+          path: dist/${{ github.ref_name }}/
+          if-no-files-found: error
+          retention-days: 30
+  draft:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-candidate
+          path: artifacts
+      - name: Validate shipped Linux binary and installer
+        run: python3 scripts/test_bundle.py artifacts
+      - name: Create draft beta release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" artifacts/* \
+            --verify-tag --draft --prerelease \
+            --title "SearchProbe $RELEASE_TAG" \
+            --notes "Read-only Google Search Console CLI for agents. See README for installation and local credential storage. Verify downloads with checksums.txt."

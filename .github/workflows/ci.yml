@@ -1,0 +1,51 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          # go.mod supports Go >=1.22; use maintained Go on current OS runners.
+          go-version: stable
+      - name: Check formatting
+        run: |
+          files=$(gofmt -l .)
+          if [ -n "$files" ]; then
+            printf '%s\n' "$files"
+            exit 1
+          fi
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build ./...
+
+      - name: Installer syntax and regression tests
+        run: |
+          sh -n scripts/install.sh
+          python3 scripts/test_install.py
+      - name: ShellCheck
+        if: runner.os == 'Linux'
+        run: shellcheck scripts/install.sh
+      - name: Release asset smoke test (no publication)
+        if: runner.os == 'macOS'
+        run: |
+          python3 scripts/release.py v0.0.0-ci
+          python3 scripts/test_bundle.py dist/v0.0.0-ci
+      - name: Native credential storage (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y gnome-keyring dbus-x11
+          dbus-run-session -- sh -c 'printf "searchprobe-ci-fixture\n" | gnome-keyring-daemon --unlock; GSC_TEST_KEYCHAIN=1 go test ./internal/auth -run TestKeychainIntegration -count=1'
+      - name: Native credential storage (macOS)
+        if: runner.os == 'macOS'
+        run: GSC_TEST_KEYCHAIN=1 go test ./internal/auth -run TestKeychainIntegration -count=1

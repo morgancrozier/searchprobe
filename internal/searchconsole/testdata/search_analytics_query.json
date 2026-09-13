@@ -1,0 +1,8 @@
+{
+  "rows": [
+    { "keys": ["example search"], "clicks": 42, "impressions": 910, "ctr": 0.046153846153846156, "position": 6.3 },
+    { "keys": ["another query"], "clicks": 7, "impressions": 120, "ctr": 0.058333333333333334, "position": 11.9 },
+    { "keys": ["zero clicks"], "clicks": 0, "impressions": 15, "ctr": 0, "position": 42.5 }
+  ],
+  "responseAggregationType": "byProperty"
+}
