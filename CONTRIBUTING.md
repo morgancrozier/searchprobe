@@ -9,7 +9,7 @@ package structure, Google API semantics, and guidance for coding agents.
 
 ## Development setup
 
-Use a maintained Go toolchain supporting Go 1.22 or later.
+Use a maintained Go toolchain supporting Go 1.25 or later.
 
 ```sh
 make build

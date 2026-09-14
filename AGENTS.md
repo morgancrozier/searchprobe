@@ -55,6 +55,7 @@ internal/auth/           Desktop OAuth, credential storage, refresh
 internal/searchconsole/  API client, pagination, normalization, error mapping
 internal/output/         JSON envelope
 internal/agent/          Claude Code and Codex skill management
+internal/mcpserver/      local stdio MCP server and typed read-only tools
 ```
 
 Prefer a small dependency graph and explicit HTTP/domain code. Preserve the

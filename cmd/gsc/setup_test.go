@@ -52,6 +52,9 @@ func TestSetupFreshAndRepeat(t *testing.T) {
 	if code := h.run("setup"); code != 0 {
 		t.Fatal(code, h.stderr.String())
 	}
+	if !strings.Contains(h.stderr.String(), "SearchProbe setup · read-only Google access and local credentials") || strings.Contains(h.stderr.String(), "no MCP") {
+		t.Fatal(h.stderr.String())
+	}
 	if !strings.Contains(h.stdout.String(), "Try this first:") || !strings.Contains(h.stdout.String(), "sc-domain:example.com") {
 		t.Fatal(h.stdout.String())
 	}

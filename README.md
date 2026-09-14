@@ -8,9 +8,10 @@
 
 [Website](https://searchprobe.com) · [Documentation](#documentation) · [Contributing](CONTRIBUTING.md)
 
-SearchProbe gives Claude Code, Codex, scripts, and terminal workflows direct,
-read-only access to Google Search Console. It returns stable JSON without browser
-automation and without routing Search Console data through a SearchProbe backend.
+SearchProbe gives MCP clients, Claude Code, Codex, scripts, and terminal workflows
+direct, read-only access to Google Search Console. It returns structured data
+without browser automation and without routing Search Console data through a
+SearchProbe backend.
 
 ```bash
 gsc performance \
@@ -54,9 +55,9 @@ You need a Google account with access to a Search Console property.
 
    ```sh
    curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location \
-     https://github.com/morgancrozier/searchprobe/releases/download/v0.1.0-beta.3/install.sh \
+     https://github.com/morgancrozier/searchprobe/releases/download/v0.1.0-beta.4/install.sh \
      -o install-searchprobe.sh
-   sh ./install-searchprobe.sh --version v0.1.0-beta.3
+   sh ./install-searchprobe.sh --version v0.1.0-beta.4
    ```
 
 2. Follow [Google OAuth setup](docs/GOOGLE_SETUP.md) to enable the Search Console
@@ -109,15 +110,32 @@ removal, see the [installation guide](docs/INSTALL.md).
 | Inspect Google's indexed version of a URL | `gsc inspect` |
 | List and inspect submitted sitemaps | `gsc sitemaps`, `gsc sitemap` |
 | Return structured machine output | `--json` |
+| Serve the same capabilities over local stdio MCP | `gsc mcp` |
 | Prepare Claude Code and Codex skills | `gsc setup`, `gsc agent` |
 
 Use `gsc <command> --help` for command-specific options. The
 [command reference](docs/COMMANDS.md) provides a compact overview.
 
+## Local MCP server
+
+After completing `gsc setup`, an MCP client can launch SearchProbe as a local
+stdio server:
+
+```sh
+gsc mcp
+```
+
+The server exposes six read-only tools: `sites`, `performance`, `compare`,
+`inspect`, `sitemaps`, and `sitemap`. It uses the same locally stored SearchProbe
+credentials and the same direct connection to Google's API as the CLI. It does
+not listen on a port, run as a daemon, add telemetry, or start an interactive
+login. Configure the MCP client to execute `gsc mcp`; SearchProbe does not yet
+write Claude Code or Codex MCP settings during setup.
+
 ## Privacy and safety
 
 ```text
-user / coding agent
+user / coding agent / MCP client
         |
         v
 local gsc binary

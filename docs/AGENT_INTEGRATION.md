@@ -2,8 +2,9 @@
 
 SearchProbe gives coding agents deterministic, read-only access to Google Search
 Console. The skill teaches discovery and interpretation; `gsc` owns auth, API
-requests, pagination and comparison. No MCP server, backend, LLM inside SearchProbe,
-or per-project instruction edits are required.
+requests, pagination and comparison. SearchProbe also provides an optional local
+stdio MCP server. Neither path adds a SearchProbe backend, an embedded LLM, or
+per-project instruction edits.
 
 ## Setup
 
@@ -69,6 +70,26 @@ gsc agent install              # skill files only
 gsc agent status
 gsc agent uninstall
 ```
+
+## Optional MCP integration
+
+After `gsc setup` has stored working credentials, configure an MCP-capable client
+to launch:
+
+```sh
+gsc mcp
+```
+
+The process exposes `sites`, `performance`, `compare`, `inspect`, `sitemaps`, and
+`sitemap` as structured read-only tools over stdio. It uses the existing local
+credentials and connects directly to Google's API. It does not open a browser;
+missing or unusable credentials produce a tool error directing the user back to
+`gsc setup` in a terminal.
+
+SearchProbe does not currently add or change Claude Code or Codex MCP settings.
+Configure the client separately and ensure the same environment can resolve the
+intended `gsc` binary. The existing SearchProbe skill and CLI remain supported
+independently of MCP.
 
 For the low-level `gsc agent install` command, the default detects a `claude`/`codex`
 executable on PATH or an existing agent configuration directory. These are hints, not proof that an agent is runnable.
@@ -138,7 +159,7 @@ including successful operations when another destination failed. Rerunning is sa
 
 ## Privacy
 
-Google OAuth and API traffic remains directly between the local CLI and Google.
+Google OAuth and API traffic remains directly between the local process and Google.
 SearchProbe has no telemetry or server receiving results. An agent analyzing output
 can send it to its model provider under that provider's settings; local-first CLI
 transport does not mean local model inference.

@@ -135,7 +135,7 @@ Exit codes: 0 success, 1 failure, 2 invalid arguments, 3 authentication required
 	root.SetErr(d.stderr)
 	root.PersistentFlags().BoolVar(&a.json, "json", false, "emit machine-readable JSON on stdout")
 
-	root.AddCommand(newSetupCmd(a), newAgentCmd(a), newAuthCmd(a), newSitesCmd(a), newPerformanceCmd(a), newCompareCmd(a), newInspectCmd(a), newSitemapsCmd(a), newSitemapCmd(a))
+	root.AddCommand(newSetupCmd(a), newAgentCmd(a), newAuthCmd(a), newSitesCmd(a), newPerformanceCmd(a), newCompareCmd(a), newInspectCmd(a), newSitemapsCmd(a), newSitemapCmd(a), newMCPCmd(a))
 	return root, a
 }
 

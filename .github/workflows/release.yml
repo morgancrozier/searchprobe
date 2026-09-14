@@ -73,4 +73,4 @@ jobs:
           gh release create "$RELEASE_TAG" artifacts/* \
             --verify-tag --draft --prerelease \
             --title "SearchProbe $RELEASE_TAG" \
-            --notes "Read-only Google Search Console CLI for agents. See README for installation and local credential storage. Verify downloads with checksums.txt."
+            --notes "Local-first, read-only Google Search Console CLI and stdio MCP server for coding agents. Uses the user's local credentials and talks directly to Google. See README for installation and verify downloads with checksums.txt."

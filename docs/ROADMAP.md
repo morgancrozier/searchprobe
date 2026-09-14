@@ -11,6 +11,7 @@ for developers, scripts, and coding agents.
 - Single and batch indexed URL inspection.
 - Read-only sitemap listing and inspection.
 - Stable JSON output with explicit metadata and structured errors.
+- A local stdio MCP server exposing all read-only SearchProbe operations.
 - Personal SearchProbe skills for Claude Code and Codex.
 - Prebuilt macOS and Linux releases for arm64 and amd64.
 
@@ -24,7 +25,6 @@ for developers, scripts, and coding agents.
 
 ## Considering
 
-- A local MCP adapter.
 - Multi-account and profile ergonomics.
 - Broader distribution, including Homebrew.
 - Additional convenience queries where they make common workflows meaningfully simpler.

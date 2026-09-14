@@ -13,12 +13,20 @@ import tarfile
 import tempfile
 
 RUNTIME_LICENSES = [
+    ("github.com/google/jsonschema-go@v0.4.3", "LICENSE"),
     ("github.com/keybase/go-keychain@v0.0.1", "LICENSE"),
+    ("github.com/modelcontextprotocol/go-sdk@v1.7.0", "LICENSE"),
+    ("github.com/segmentio/asm@v1.1.3", "LICENSE"),
+    ("github.com/segmentio/encoding@v0.5.4", "LICENSE"),
     ("github.com/spf13/cobra@v1.8.1", "LICENSE.txt"),
     ("github.com/spf13/pflag@v1.0.5", "LICENSE"),
+    ("github.com/yosida95/uritemplate/v3@v3.0.2", "LICENSE"),
     ("github.com/zalando/go-keyring@v0.2.6", "LICENSE"),
     ("github.com/godbus/dbus/v5@v5.1.0", "LICENSE"),
-    ("golang.org/x/oauth2@v0.23.0", "LICENSE"),
+    ("golang.org/x/oauth2@v0.35.0", "LICENSE"),
+    ("golang.org/x/sync@v0.20.0", "LICENSE"),
+    ("golang.org/x/sys@v0.41.0", "LICENSE"),
+    ("golang.org/x/time@v0.15.0", "LICENSE"),
 ]
 
 

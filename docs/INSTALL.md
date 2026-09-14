@@ -11,19 +11,19 @@ Have the downloaded JSON ready before running setup.
 
 ## Native installation
 
-Download the pinned installer from the `v0.1.0-beta.3` GitHub prerelease. The
+Download the pinned installer from the `v0.1.0-beta.4` GitHub prerelease. The
 installer then downloads the checksum manifest and the one matching archive:
 
 ```sh
 curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location \
-  https://github.com/morgancrozier/searchprobe/releases/download/v0.1.0-beta.3/install.sh \
+  https://github.com/morgancrozier/searchprobe/releases/download/v0.1.0-beta.4/install.sh \
   -o install-searchprobe.sh
-sh ./install-searchprobe.sh --version v0.1.0-beta.3
+sh ./install-searchprobe.sh --version v0.1.0-beta.4
 "$HOME/.local/share/searchprobe/bin/gsc" setup --client-file "$HOME/Downloads/client.json"
 ```
 
 Replace the JSON path with your download. Release archives are named
-`searchprobe_0.1.0-beta.3_<darwin|linux>_<arm64|amd64>.tar.gz`. The installer
+`searchprobe_0.1.0-beta.4_<darwin|linux>_<arm64|amd64>.tar.gz`. The installer
 selects the correct archive and refuses missing, duplicate, malformed, or
 mismatched checksums.
 
@@ -83,6 +83,12 @@ Code/Codex after PATH changes so its shell can find SearchProbe. Setup verifies
 Google access and skill files, not activation inside the agent. Start a fresh
 agent session in your website repository and use the suggested first prompt.
 See [agent integration](AGENT_INTEGRATION.md).
+
+MCP-capable clients can use the same local credentials and direct Google API
+connection by launching `gsc mcp` over stdio. Configure that command in the MCP
+client separately; SearchProbe setup does not change Claude Code or Codex MCP
+settings. See [agent integration](AGENT_INTEGRATION.md) for the six available
+read-only tools and operational details.
 
 ## Update and removal
 

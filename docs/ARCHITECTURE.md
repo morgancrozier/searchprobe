@@ -25,11 +25,11 @@ core can be tested independently.
                     +-------------+-------------+
                                   |
                                   v
-                               CLI UX
-                 |
-          +------+------+
-          |             |
-        human       coding agent
+                     +------------+------------+
+                     |                         |
+                  CLI UX                 local MCP stdio
+                     |                         |
+                  human                  coding agent
 ```
 
 ## Technology direction
@@ -58,6 +58,7 @@ cmd/gsc/                     package main; `go install ./cmd/gsc` yields the gsc
   compare.go                 period comparison (reuses the performance flags)
   inspect.go                 single and batch (--urls-file) URL inspection
   sitemaps.go                sitemaps (list) and sitemap (detail), read-only
+  mcp.go                     thin Cobra adapter for the local stdio MCP server
 
 internal/
   gscerr/                    normalized error type, stable codes, exit-code mapping
@@ -78,9 +79,14 @@ internal/
     sitemaps.go              read-only sitemap list/detail normalization
   output/
     envelope.go              JSON envelope
+  mcpserver/
+    server.go                MCP identity, lifecycle, injected client interface
+    tools.go                 six typed read-only tool adapters and result shaping
 ```
 
-Preserve the dependency direction: command code calls `auth` and `searchconsole`; those packages never import `cmd/gsc` or `output`.
+Preserve the dependency direction: command code calls the reusable internal
+packages; those packages never import `cmd/gsc`. `searchconsole` also remains
+independent of output rendering and MCP protocol code.
 
 ## Authentication model
 
@@ -193,7 +199,25 @@ Consequences:
 
 ## Core client
 
-`internal/searchconsole.Client` provides domain methods for sites, performance, comparisons, URL inspection, and sitemaps independently of Cobra and output rendering. Commands reuse these methods rather than duplicating API logic.
+`internal/searchconsole.Client` provides domain methods for sites, performance,
+comparisons, URL inspection, and sitemaps independently of Cobra and output
+rendering. CLI commands and `internal/mcpserver` both reuse these methods rather
+than shelling out or duplicating Google API logic.
+
+## Local MCP adapter
+
+`gsc mcp` uses the official Go MCP SDK and stdio transport. The Cobra command
+injects the existing non-interactive authenticated client factory, SearchProbe
+version, and clock into `internal/mcpserver`. Tool input structs generate JSON
+schemas, and tool results carry structured data, metadata, warnings, or normalized
+errors. Every tool is annotated read-only.
+
+The MCP process is session-scoped. It exits when the client disconnects or the
+command context is cancelled. stdout contains protocol traffic only. There is no
+HTTP transport, listening port, daemon, hosted service, telemetry, or second
+authentication mechanism.
+
+Official SDK: https://github.com/modelcontextprotocol/go-sdk
 
 ## JSON contract
 

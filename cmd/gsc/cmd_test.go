@@ -142,7 +142,7 @@ func TestHelp(t *testing.T) {
 	if code := h.run("--help"); code != 0 {
 		t.Fatalf("exit %d: %s", code, h.stderr.String())
 	}
-	for _, want := range []string{"auth", "sites", "performance", "compare", "inspect", "sitemaps", "sitemap ", "--json", "Exit codes"} {
+	for _, want := range []string{"auth", "sites", "performance", "compare", "inspect", "sitemaps", "sitemap ", "mcp", "--json", "Exit codes"} {
 		if !strings.Contains(h.stdout.String(), want) {
 			t.Errorf("help missing %q", want)
 		}

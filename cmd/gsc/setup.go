@@ -67,7 +67,7 @@ OS storage is preferred; --credential-store file selects protected plaintext sto
 					targets[i] = agent.Status(targets[i])
 				}
 			}
-			fmt.Fprintln(a.stderr, "SearchProbe setup · read-only Google access, local credentials, no MCP")
+			fmt.Fprintln(a.stderr, "SearchProbe setup · read-only Google access and local credentials")
 			if interactive && !cmd.Flags().Changed("agent") {
 				defaults := []string{}
 				for _, t := range targets {

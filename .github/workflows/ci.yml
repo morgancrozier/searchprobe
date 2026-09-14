@@ -15,7 +15,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@v7
         with:
-          # go.mod supports Go >=1.22; use maintained Go on current OS runners.
+          # go.mod supports Go >=1.25; use maintained Go on current OS runners.
           go-version: stable
       - name: Check formatting
         run: |

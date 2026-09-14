@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 
 bundle = Path(sys.argv[1]).resolve()
 root = Path(__file__).resolve().parent.parent
@@ -65,6 +66,92 @@ for line in skill_lines[1:frontmatter_end]:
     frontmatter[key] = value.strip()
 assert frontmatter.get('name') == 'searchprobe'
 assert frontmatter.get('description', '').strip('"\'')
+
+
+def read_mcp_response(process, request_id, lines):
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        line = process.stdout.readline()
+        if not line:
+            raise AssertionError(f'MCP server closed before response {request_id}; stdout={lines!r}')
+        lines.append(line)
+        message = json.loads(line)
+        assert message.get('jsonrpc') == '2.0', message
+        if message.get('id') == request_id:
+            return message
+    raise AssertionError(f'timed out waiting for MCP response {request_id}')
+
+
+def write_mcp_message(process, message):
+    process.stdin.write(json.dumps(message, separators=(',', ':')) + '\n')
+    process.stdin.flush()
+
+
+def smoke_mcp(binary, cwd, env, version):
+    process = subprocess.Popen(
+        [str(binary), 'mcp'], cwd=cwd, env=env,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, bufsize=1)
+    stdout_lines = []
+    try:
+        write_mcp_message(process, {
+            'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
+            'params': {
+                'protocolVersion': '2025-11-25',
+                'capabilities': {},
+                'clientInfo': {'name': 'searchprobe-bundle-test', 'version': '1'},
+            },
+        })
+        initialized = read_mcp_response(process, 1, stdout_lines)
+        assert 'error' not in initialized, initialized
+        result = initialized['result']
+        assert result['protocolVersion'] == '2025-11-25', result
+        assert result['serverInfo']['name'] == 'searchprobe', result
+        assert result['serverInfo']['title'] == 'SearchProbe', result
+        assert result['serverInfo']['version'] == version, result
+
+        write_mcp_message(process, {
+            'jsonrpc': '2.0', 'method': 'notifications/initialized', 'params': {},
+        })
+        write_mcp_message(process, {
+            'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list', 'params': {},
+        })
+        listed = read_mcp_response(process, 2, stdout_lines)
+        assert 'error' not in listed, listed
+        names = {tool['name'] for tool in listed['result']['tools']}
+        assert names == {'sites', 'performance', 'compare', 'inspect', 'sitemaps', 'sitemap'}, names
+
+        write_mcp_message(process, {
+            'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call',
+            'params': {'name': 'sites', 'arguments': {}},
+        })
+        called = read_mcp_response(process, 3, stdout_lines)
+        assert 'error' not in called, called
+        tool_result = called['result']
+        assert tool_result['isError'] is True, tool_result
+        structured = tool_result['structuredContent']
+        assert structured['ok'] is False, structured
+        assert structured['error']['code'] == 'AUTH_REQUIRED', structured
+        assert 'gsc setup' in structured['error']['action'], structured
+
+        process.stdin.close()
+        process.stdin = None
+        process.wait(timeout=5)
+        remainder = process.stdout.read()
+        if remainder:
+            stdout_lines.extend(remainder.splitlines(keepends=True))
+        stderr = process.stderr.read()
+        assert process.returncode == 0, (process.returncode, stderr)
+        assert stderr == '', stderr
+        for line in stdout_lines:
+            message = json.loads(line)
+            assert message.get('jsonrpc') == '2.0', message
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait()
+
+
 with tempfile.TemporaryDirectory(prefix='searchprobe-fresh-') as scratch:
     home = Path(scratch) / 'new user'
     home.mkdir()
@@ -80,10 +167,11 @@ with tempfile.TemporaryDirectory(prefix='searchprobe-fresh-') as scratch:
     env['PATH'] = str(binary.parent) + ':' + env['PATH']
     version = run(['gsc', '--version']).stdout.strip()
     assert version == 'SearchProbe gsc version ' + version_text, version
-    for command in [[], ['setup'], ['auth'], ['auth', 'login'], ['performance'], ['compare'], ['inspect']]:
+    for command in [[], ['setup'], ['auth'], ['auth', 'login'], ['performance'], ['compare'], ['inspect'], ['mcp']]:
         help_text = run(['gsc', *command, '--help']).stdout
         assert 'Usage:' in help_text
         print('help', ' '.join(command) or 'root', len(help_text.encode()), 'bytes')
+    smoke_mcp(binary, home, env, version_text)
     setup = json.loads(run(['gsc', 'setup', '--agent', 'all', '--json'], 3).stdout)
     assert setup['error']['code'] == 'AUTH_REQUIRED'
     assert not (home / '.claude').exists()
